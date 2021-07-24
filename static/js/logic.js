@@ -6,6 +6,14 @@ d3.json(queryUrl, function(data) {
  createFeatures(data.features);
  console.log(data.features);
 });
+
+var plateUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
+// Here we make an AJAX call to get our Tectonic Plate geoJSON data.
+d3.json(plateUrl, function(plateData) {
+  createLayers(plateData.features);
+  console.log(plateData.features);
+});
+
 function createFeatures(earthquakeData) { // *** earthquakeData is the DATA coming from up above's query ***
  // Define a function we want to run once for each feature in the features array
  // Give each feature a popup describing the place and time of the earthquake
@@ -22,10 +30,26 @@ function createFeatures(earthquakeData) { // *** earthquakeData is the DATA comi
  createMap(earthquakes);
 }
 
+function createLayers(platesData) { // *** earthquakeData is the DATA coming from up above's query ***
+  // Define a function we want to run once for each feature in the features array
+  // // Give each feature a popup describing the place and time of the earthquake
+  // function onEachFeaturePrep(feature, layer) { // **** GRAB only what is needed from the DATA *****
+  // layer.bindPopup("<h3>" + feature.properties.place +
+  // "</h3><hr><p>" + new Date(feature.properties.time));
+  // }
+  // Create a GeoJSON layer containing the features array on the earthquakeData object
+  // Run the onEachFeature function once for each piece of data in the array
+  var plates = L.geoJSON(platesData, { // *** CALL the geoJSON function on the DATA
+  // onEachFeature: onEachFeaturePrep
+  });
+  // Sending our earthquakes layer to the createMap function
+  createMap(plates);
+ }
+
 
 
 // function for map layers
-function createMap(earthquakes) {
+function createMap(earthquakes, plates) {
 
   // tile layers for mapbox
   var grayMap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -64,7 +88,8 @@ function createMap(earthquakes) {
 
   // create overlay object to hold our overlay layer
   var overlayMaps = {
-    Earthquakes: earthquakes
+    Earthquakes: earthquakes,
+    Plates: plates
   };
 
   // create map, giving layers to display on load
@@ -73,7 +98,7 @@ function createMap(earthquakes) {
       37.09, -95.71
     ],
     zoom: 4,
-    layers: [outdoorsMap, grayMap, satelliteMap]
+    layers: [outdoorsMap, overlayMaps]
   });
 
   // create a layer control
@@ -83,8 +108,3 @@ function createMap(earthquakes) {
     collapsed: true
   }).addTo(myMap);
 }
-
-  // Here we make an AJAX call to get our Tectonic Plate geoJSON data.
-  // d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json",
-  //   function(platedata) {
-
