@@ -1,6 +1,5 @@
 // Store our API endpoint inside queryUrl
-var queryUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2014-01-01&endtime=" +
- "2014-01-02&maxlongitude=-69.52148437&minlongitude=-123.83789062&maxlatitude=48.74894534&minlatitude=25.16517337";
+var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
 // Perform a GET request to the query URL
 d3.json(queryUrl, function(data) {
  // Once we get a response, send the data.features object to the createFeatures function
@@ -12,7 +11,7 @@ function createFeatures(earthquakeData) { // *** earthquakeData is the DATA comi
  // Give each feature a popup describing the place and time of the earthquake
  function onEachFeaturePrep(feature, layer) { // **** GRAB only what is needed from the DATA *****
  layer.bindPopup("<h3>" + feature.properties.place +
- "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+ "</h3><hr><p>" + new Date(feature.properties.time));
  }
  // Create a GeoJSON layer containing the features array on the earthquakeData object
  // Run the onEachFeature function once for each piece of data in the array
@@ -58,9 +57,9 @@ function createMap(earthquakes) {
 
   // define basemap object to hold our base layers
   var baseMaps = {
+    "Outdoors Map": outdoorsMap,
     "Gray Map": grayMap,
-    "Satellite Map": satelliteMap,
-    "Outdoors Map": outdoorsMap
+    "Satellite Map": satelliteMap
   };
 
   // create overlay object to hold our overlay layer
@@ -73,15 +72,15 @@ function createMap(earthquakes) {
     center: [
       37.09, -95.71
     ],
-    zoom: 5,
-    layers: [grayMap, satelliteMap, outdoorsMap]
+    zoom: 4,
+    layers: [outdoorsMap, grayMap, satelliteMap]
   });
 
   // create a layer control
   // pass in our basemaps and overlaymaps
   // add layer control to the map
   L.control.layers(baseMaps, overlayMaps, {
-    collapsed: false
+    collapsed: true
   }).addTo(myMap);
 }
 
