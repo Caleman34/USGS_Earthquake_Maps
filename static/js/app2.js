@@ -2,9 +2,16 @@
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
 // Perform a GET request to the query URL
 d3.json(queryUrl, function(data) {
-  // Once we get a response, send the data.features object to the createFeatures function
-  createFeatures(data.features);
-  console.log(data.features); 
+ // Once we get a response, send the data.features object to the createFeatures function
+ createFeatures(data.features);
+ console.log(data.features);
+});
+
+var plateUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
+// Here we make an AJAX call to get our Tectonic Plate geoJSON data.
+d3.json(plateUrl, function(plateData) {
+  createFeatures(plateData.features);
+  console.log(plateData.features);
 });
 
 function createFeatures(earthquakeData) {
@@ -21,8 +28,17 @@ function createFeatures(earthquakeData) {
  createMap(earthquakes);
 }
 
+function createLayers(plateData) { 
+  var plates = L.geoJSON(plateData);// *** CALL the geoJSON function on the DATA
+  
+  // Sending our earthquakes layer to the createMap function
+  createMap(plates);
+ }
+
+
+
 // function for map layers
-function createMap(earthquakes) {
+function createMap(earthquakes, plates) {
 
   // tile layers for mapbox
   var grayMap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -51,6 +67,8 @@ function createMap(earthquakes) {
     id: "mapbox/outdoors-v11",
     accessToken: API_KEY
   });
+
+
   
   // define basemap object to hold our base layers
   var baseMaps = {
@@ -61,7 +79,8 @@ function createMap(earthquakes) {
 
   // create overlay object to hold our overlay layer
   var overlayMaps = {
-    Earthquakes: earthquakes
+    Earthquakes: earthquakes,
+    Plates: plates
   };
 
   // create map, giving layers to display on load
@@ -70,7 +89,7 @@ function createMap(earthquakes) {
       37.09, -95.71
     ],
     zoom: 4,
-    layers: [outdoorsMap, earthquakes]
+    layers: [outdoorsMap, overlayMaps]
   });
 
   // create a layer control
